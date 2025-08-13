@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
-const LoginScreen = ({ onLogin }) => {
+const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -182,7 +182,10 @@ const LoginScreen = ({ onLogin }) => {
         <div className="mt-6 text-center">
           <p className="text-sm text-blue-200">
             Não tem uma conta?{' '}
-            <button className="text-blue-400 hover:text-blue-300 font-medium">
+            <button 
+              onClick={onSwitchToRegister}
+              className="text-blue-400 hover:text-blue-300 font-medium"
+            >
               Registre-se
             </button>
           </p>

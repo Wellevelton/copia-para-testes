@@ -214,25 +214,33 @@ const ReportsDashboard = () => {
         <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
           Progresso das Metas
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data.goals}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, completed }) => `${name}: ${completed}%`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="completed"
-            >
-              {data.goals.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={['#10B981', '#3B82F6', '#F59E0B', '#EF4444'][index]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+        {data.goals && data.goals.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={data.goals}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, completed }) => `${name}: ${completed}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="completed"
+              >
+                {data.goals.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={['#10B981', '#3B82F6', '#F59E0B', '#EF4444'][index]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+            <div className="text-6xl mb-4">🎯</div>
+            <h4 className="text-lg font-medium mb-2">Nenhuma meta cadastrada</h4>
+            <p className="text-sm">Cadastre suas metas para ver o progresso aqui</p>
+          </div>
+        )}
       </div>
     </div>
   );

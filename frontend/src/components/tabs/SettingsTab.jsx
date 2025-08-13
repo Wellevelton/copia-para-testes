@@ -135,21 +135,24 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                return parseFloat(numStr) || 0;
              };
 
+             console.log(`Row ${index + 1}:`, row); // Debug para ver os dados
 
-
-             return {
-               mes: row['Ms'] || row.Mês || row.mes || row.Mes || '',
-               rendaDev: extractNumber(row['Renda Dev'] || row.rendaDev || row.RendaDev),
-               rendaContab: extractNumber(row['Renda Contab'] || row.rendaContab || row.RendaContab),
-               freelas: extractNumber(row.Freelas || row.freelas),
-               rendaTotal: extractNumber(row['Renda Total'] || row.rendaTotal || row.RendaTotal),
-               gastos: extractNumber(row.Gastos || row.gastos),
-               aporte: extractNumber(row.Aporte || row.aporte),
-               saldoAcum: extractNumber(row['Saldo Acum.'] || row.saldoAcum || row.SaldoAcum)
+             const financeItem = {
+               mes: row['Mês'] || row['Ms'] || row.mes || row.Mes || row.Month || '',
+               rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev']),
+               rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab']),
+               freelas: extractNumber(row.Freelas || row.freelas || row['Freelance']),
+               rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total']),
+               gastos: extractNumber(row.Gastos || row.gastos || row['Despesas']),
+               aporte: extractNumber(row.Aporte || row.aporte || row['Investimento']),
+               saldoAcum: extractNumber(row['Saldo Acum.'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'])
              };
+
+             console.log(`Finance item ${index + 1}:`, financeItem); // Debug
+             return financeItem;
            });
            
-
+           console.log('Final finance data:', financeData); // Debug
            setPlanilhaFinanceiraState(financeData);
          }
 

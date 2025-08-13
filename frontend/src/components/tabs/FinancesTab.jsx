@@ -515,8 +515,13 @@ const FinancesTab = ({
           </button>
         ))}
       </div>
-      {activeSubTab === 'transactions' ? renderTransactions() : 
-       activeSubTab === 'budget' ? renderBudget() : renderPlanning()}
+      
+      {/* Mostrar todas as abas sempre */}
+      <div className="space-y-8">
+        {activeSubTab === 'transactions' && renderTransactions()}
+        {activeSubTab === 'budget' && renderBudget()}
+        {activeSubTab === 'planning' && renderPlanning()}
+      </div>
 
       {/* Modal Nova Transação */}
       {showNewTransactionModal && (
