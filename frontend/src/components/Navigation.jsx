@@ -24,9 +24,10 @@ const Navigation = ({
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-    // Limpar estados de Perfil e Configurações quando navegar para outras abas
+    // Limpar estados de Perfil, Configurações e Relatórios quando navegar para outras abas
     setShowProfile(false);
     setShowSettings(false);
+    setShowReports(false);
     setShowUserMenu(false);
     
     if (tabId === 'calendar') {
@@ -110,20 +111,7 @@ const Navigation = ({
                   <BarChart3 size={16} />
                   Relatórios
                 </button>
-                <button 
-                  onClick={() => {
-                    // Conectar Google Calendar
-                    setShowUserMenu(false);
-                  }}
-                  className={`w-full text-left px-4 py-2 transition-colors flex items-center gap-2 ${
-                    isGoogleCalendarConnected 
-                      ? 'text-green-400 hover:bg-gray-700' 
-                      : 'text-white hover:bg-gray-700'
-                  }`}
-                >
-                  <Calendar size={16} />
-                  {isGoogleCalendarConnected ? 'Google Calendar ✓' : 'Conectar Google Calendar'}
-                </button>
+
                 <hr className="border-gray-700 my-2" />
                 <button 
                   onClick={() => {

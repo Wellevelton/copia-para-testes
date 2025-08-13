@@ -356,8 +356,9 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                <span className="text-gray-400 text-sm font-medium">Disponível</span>
+                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  Conectar
+                </button>
               </div>
             </div>
           </div>

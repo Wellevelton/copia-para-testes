@@ -7,6 +7,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
   const [editingRow, setEditingRow] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentYear, setCurrentYear] = useState(2026);
+  const [filteredData, setFilteredData] = useState([]);
 
   // Função para calcular valores automaticamente
   const calculateValues = (row) => {
@@ -42,6 +43,15 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
       setPlanilhaFinanceiraState(finalData);
     }
   }, []);
+
+  // Filtrar dados por ano
+  useEffect(() => {
+    const filtered = planilhaFinanceiraState.filter(row => {
+      const rowYear = parseInt(row.mes?.split('-')[0]);
+      return rowYear === currentYear;
+    });
+    setFilteredData(filtered);
+  }, [currentYear, planilhaFinanceiraState]);
 
   // Função para adicionar nova linha
   const addNewRow = () => {
@@ -183,22 +193,6 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
         
         <div className="flex space-x-3">
           <button
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <Upload size={16} />
-            <span>Importar</span>
-          </button>
-          
-          <button
-            onClick={exportData}
-            className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <Download size={16} />
-            <span>Exportar</span>
-          </button>
-          
-          <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
@@ -268,7 +262,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {planilhaFinanceiraState.map((row, index) => (
+              {filteredData.map((row, index) => (
                 <tr
                   key={index}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700"
