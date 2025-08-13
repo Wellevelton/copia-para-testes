@@ -145,7 +145,7 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total']),
                gastos: extractNumber(row.Gastos || row.gastos || row['Despesas']),
                aporte: extractNumber(row.Aporte || row.aporte || row['Investimento']),
-               saldoAcum: extractNumber(row['Saldo Acum.'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'])
+               saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'])
              };
 
              console.log(`Finance item ${index + 1}:`, financeItem); // Debug
@@ -242,10 +242,11 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                    <p>• <strong>Exemplo:</strong> "1, 2024-01-01, 2024-01-07, Berlim, Alemanha, Schengen, 500, 300, 200, 50, 30, 100, 1180, 1.2, Notas da viagem, 100, 50, 0, 150, 75, 0, 500, 1416, 100, 200, 1516, 1616, Bloco A, 7, 7, Sim, 2000, 500"</p>
                  </>
                                ) : (
-                  <>
-                    <p>• <strong>Planilha Financeira:</strong> Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
-                    <p>• <strong>Exemplo:</strong> "2026-01, 3500, 2500, 500, 6500, 2500, 4000, 4000"</p>
-                  </>
+                                   <>
+                   <p>• <strong>Planilha Financeira:</strong> Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
+                   <p>• <strong>Exemplo:</strong> "2026-01, 3500, 2500, 500, 6500, 2500, 4000, 4000"</p>
+                   <p>• <strong>Formato CSV:</strong> Primeira linha deve conter os cabeçalhos: Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
+                 </>
                 )}
              </div>
            </div>
