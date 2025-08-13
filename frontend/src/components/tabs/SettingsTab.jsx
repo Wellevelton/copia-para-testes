@@ -177,10 +177,8 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
              // Primeiro, limpar dados existentes (opcional)
              // await api.financialPlanning.clear();
              
-             // Salvar cada item no backend
-             for (const item of financeData) {
-               await api.financialPlanning.create(item);
-             }
+             // Salvar cada item no backend usando Promise.all
+             await Promise.all(financeData.map(item => api.financialPlanning.create(item)));
              
              console.log('Dados salvos no backend com sucesso!');
              setPlanilhaFinanceiraState(financeData);
