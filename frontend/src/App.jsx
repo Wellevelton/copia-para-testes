@@ -362,14 +362,6 @@ const App = () => {
           />
         );
       case 'finances':
-        if (activeSubTab === 'planning') {
-          return (
-            <FinancialPlanningTab 
-              planilhaFinanceiraState={planilhaFinanceiraState}
-              setPlanilhaFinanceiraState={setPlanilhaFinanceiraState}
-            />
-          );
-        }
         return (
           <FinancesTab 
             activeSubTab={activeSubTab}
@@ -381,6 +373,8 @@ const App = () => {
             editingBudget={editingBudget}
             setEditingBudget={setEditingBudget}
             planilhaFinanceira={planilhaFinanceiraState}
+            planilhaFinanceiraState={planilhaFinanceiraState}
+            setPlanilhaFinanceiraState={setPlanilhaFinanceiraState}
           />
         );
               case 'career':

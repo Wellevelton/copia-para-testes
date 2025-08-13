@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { Plus, Import, Save, DollarSign, TrendingUp, AlertCircle, Edit, Target, Zap, Globe, Calendar } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import NewTransactionModal from '../modals/NewTransactionModal';
+import FinancialPlanningTab from './FinancialPlanningTab';
 
 const FinancesTab = ({ 
   activeSubTab, 
   setActiveSubTab, 
   finances, 
-  setFinances,
+  setFinances, 
   budget, 
   setBudget, 
   editingBudget, 
-  setEditingBudget, 
-  planilhaFinanceira 
+  setEditingBudget,
+  planilhaFinanceira,
+  planilhaFinanceiraState,
+  setPlanilhaFinanceiraState
 }) => {
   const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState(2026);
@@ -358,143 +361,11 @@ const FinancesTab = ({
   };
 
   const renderPlanning = () => {
-    if (!planilhaFinanceira || planilhaFinanceira.length === 0) {
-      return (
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Planejamento Financeiro</h2>
-          </div>
-          <div className="bg-gray-800 rounded-xl p-8 text-center">
-            <h3 className="text-white text-xl mb-4">Nenhum dado de planejamento encontrado</h3>
-            <p className="text-gray-400">Importe sua planilha financeira para ver as projeções</p>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Planejamento Financeiro</h2>
-        </div>
-
-        {/* Cards de Resumo Financeiro */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm font-medium">Meta Final 2028</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(getFinalGoal())}
-                </p>
-                <p className="text-blue-200 text-xs mt-1">Saldo Acumulado</p>
-              </div>
-              <div className="bg-blue-500 bg-opacity-30 p-3 rounded-lg">
-                <Target className="text-blue-100" size={28} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm font-medium">Renda Máxima</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(getMaxIncome())}
-                </p>
-                <p className="text-green-200 text-xs mt-1">
-                  {getMaxIncomeMonth() ? getMaxIncomeMonth().split('-').reverse().join('/') : 'N/A'}
-                </p>
-              </div>
-              <div className="bg-green-500 bg-opacity-30 p-3 rounded-lg">
-                <TrendingUp className="text-green-100" size={28} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100 text-sm font-medium">Crescimento</p>
-                <p className="text-white text-xl font-bold">{getGrowthPercentage()}%</p>
-                <p className="text-purple-200 text-xs mt-1">Renda vs Inicial</p>
-              </div>
-              <div className="bg-purple-500 bg-opacity-30 p-3 rounded-lg">
-                <Zap className="text-purple-100" size={28} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-orange-600 to-orange-800 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100 text-sm font-medium">Viagens Plan.</p>
-                <p className="text-white text-xl font-bold">{getTravelCount()}</p>
-                <p className="text-orange-200 text-xs mt-1">Destinos únicos</p>
-              </div>
-              <div className="bg-orange-500 bg-opacity-30 p-3 rounded-lg">
-                <Globe className="text-orange-100" size={28} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabela de Projeção Financeira */}
-        <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-white font-semibold text-xl flex items-center gap-3">
-              <DollarSign className="text-green-400" size={24} />
-              Projeção Financeira
-            </h3>
-            <div className="flex items-center gap-3">
-              <label className="text-gray-300 text-sm font-medium">Ano:</label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-white focus:outline-none focus:border-blue-500"
-              >
-                {[2026, 2027, 2028].map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-400 pb-3">Mês</th>
-                  <th className="text-right text-gray-400 pb-3">Renda Dev</th>
-                  <th className="text-right text-gray-400 pb-3">Renda Contab</th>
-                  <th className="text-right text-gray-400 pb-3">Freelas</th>
-                  <th className="text-right text-gray-400 pb-3">Total</th>
-                  <th className="text-right text-gray-400 pb-3">Gastos</th>
-                  <th className="text-right text-gray-400 pb-3">Aporte</th>
-                  <th className="text-right text-gray-400 pb-3">Acumulado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {planilhaFinanceira
-                  .filter(item => parseInt(item.mes.split('-')[0]) === selectedYear)
-                  .map((item, index) => (
-                    <tr key={index} className="border-b border-gray-700 hover:bg-gray-700 transition-colors">
-                      <td className="py-3 text-white font-medium">{item.mes}</td>
-                      <td className="py-3 text-right text-gray-300">R$ {Number(item.rendaDev).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-gray-300">R$ {Number(item.rendaContab).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-blue-400">R$ {Number(item.freelas).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-green-400 font-semibold">R$ {Number(item.rendaTotal).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-red-400">R$ {Number(item.gastos).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-purple-400">R$ {Number(item.aporte).toLocaleString('pt-BR')}</td>
-                      <td className="py-3 text-right text-yellow-400 font-bold">R$ {Number(item.saldoAcum).toLocaleString('pt-BR')}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <FinancialPlanningTab 
+        planilhaFinanceiraState={planilhaFinanceiraState}
+        setPlanilhaFinanceiraState={setPlanilhaFinanceiraState}
+      />
     );
   };
 
