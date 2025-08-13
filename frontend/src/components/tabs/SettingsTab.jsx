@@ -172,21 +172,17 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
            
            console.log('Final finance data:', financeData); // Debug
            
-           // Salvar no backend
-           try {
-             // Primeiro, limpar dados existentes (opcional)
-             // await api.financialPlanning.clear();
-             
-             // Salvar cada item no backend usando Promise.all
-             await Promise.all(financeData.map(item => api.financialPlanning.create(item)));
-             
-             console.log('Dados salvos no backend com sucesso!');
-             setPlanilhaFinanceiraState(financeData);
-           } catch (error) {
-             console.error('Erro ao salvar no backend:', error);
-             // Fallback para localStorage
-             setPlanilhaFinanceiraState(financeData);
-           }
+           // Salvar dados localmente por enquanto
+           console.log('Dados processados com sucesso!');
+           setPlanilhaFinanceiraState(financeData);
+           
+           // TODO: Implementar salvamento no backend posteriormente
+           // try {
+           //   await Promise.all(financeData.map(item => api.financialPlanning.create(item)));
+           //   console.log('Dados salvos no backend com sucesso!');
+           // } catch (error) {
+           //   console.error('Erro ao salvar no backend:', error);
+           // }
          }
 
         alert(`${importType === 'travels' ? 'Viagens' : 'Transações financeiras'} importadas com sucesso!`);
