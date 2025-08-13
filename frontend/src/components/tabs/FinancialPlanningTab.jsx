@@ -4,7 +4,7 @@ import api from '../../services/api';
 
 const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraState }) => {
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+
   const [editingRow, setEditingRow] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentYear, setCurrentYear] = useState(2026);
@@ -80,25 +80,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
     setFilteredData(filtered);
   }, [currentYear, planilhaFinanceiraState]);
 
-  // Função para adicionar nova linha
-  const addNewRow = () => {
-    const newRow = {
-      mes: `${currentYear}-${String(planilhaFinanceiraState.length + 1).padStart(2, '0')}`,
-      rendaDev: 3500,
-      rendaContab: 2500,
-      freelas: 500,
-      rendaTotal: 6500,
-      gastos: 2500,
-      aporte: 4000,
-      saldoAcum: 0
-    };
 
-    const calculatedRow = calculateValues(newRow);
-    const updatedData = [...planilhaFinanceiraState, calculatedRow];
-    const finalData = calculateSaldoAcum(updatedData);
-    setPlanilhaFinanceiraState(finalData);
-    setShowAddModal(false);
-  };
 
   // Função para editar linha
   const startEditing = (index) => {
@@ -219,14 +201,6 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
         </div>
         
         <div className="flex space-x-3">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <Plus size={16} />
-            <span>Adicionar</span>
-          </button>
-          
           <button
             onClick={resetData}
             className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
@@ -431,33 +405,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
         </div>
       )}
 
-      {/* Modal de Adicionar */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-              Adicionar Nova Linha
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Uma nova linha será adicionada com valores padrão para o ano {currentYear}.
-            </p>
-            <div className="flex space-x-3">
-              <button
-                onClick={addNewRow}
-                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg"
-              >
-                Adicionar
-              </button>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

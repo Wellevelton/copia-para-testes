@@ -128,56 +128,52 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
           setViagensDataState(travelData);
                  } else {
            // Processar dados financeiros da planilha de planejamento
+           console.log('CSV Data:', data); // Debug completo
+           
            const financeData = data.map((row, index) => {
-             // Função para extrair valor numérico de strings como "R$ 1.000"
+             console.log(`Processing row ${index + 1}:`, row); // Debug detalhado
+             
+             // Função para extrair valor numérico
              const extractNumber = (value) => {
                if (!value) return 0;
                const numStr = value.toString().replace(/[^\d,.-]/g, '').replace(',', '.');
-               return parseFloat(numStr) || 0;
+               const result = parseFloat(numStr) || 0;
+               console.log(`Extracted ${value} -> ${result}`);
+               return result;
              };
 
-             console.log(`Row ${index + 1}:`, row); // Debug para ver os dados
-
-             // Tentar diferentes formatos de mês
+             // Simplificar: usar qualquer coluna que contenha mês/ano
              let mes = '';
              
-             // Se tem coluna 'mes' direta
-             if (row.mes) {
-               mes = row.mes;
-             }
-             // Se tem ano e mês separados
-             else if (row.ano && row['Mês']) {
-               mes = `${row.ano}-${String(row['Mês']).padStart(2, '0')}`;
-             }
-             // Se tem formato YYYY-MM
-             else if (row['Mês'] && row['Mês'].includes('-')) {
-               mes = row['Mês'];
-             }
-             // Se tem apenas mês como número
-             else if (row['Mês']) {
-               const currentYear = new Date().getFullYear();
-               mes = `${currentYear}-${String(row['Mês']).padStart(2, '0')}`;
-             }
-
+             // Tentar todas as possibilidades
+             if (row.mes) mes = row.mes;
+             else if (row.Mês) mes = row.Mês;
+             else if (row.month) mes = row.month;
+             else if (row.Month) mes = row.Month;
+             else if (row.ano && row['Mês']) mes = `${row.ano}-${String(row['Mês']).padStart(2, '0')}`;
+             else if (row.year && row.month) mes = `${row.year}-${String(row.month).padStart(2, '0')}`;
+             
+             // Se ainda não tem mês, usar índice + ano atual
              if (!mes) {
-               console.log(`Skipping row ${index + 1}: no valid month found`);
-               return null;
+               const currentYear = new Date().getFullYear();
+               mes = `${currentYear}-${String(index + 1).padStart(2, '0')}`;
+               console.log(`Using default month for row ${index + 1}: ${mes}`);
              }
 
              const financeItem = {
                mes: mes,
-               rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev'] || 0),
-               rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab'] || 0),
-               freelas: extractNumber(row.Freelas || row.freelas || row['Freelance'] || 0),
-               rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total'] || 0),
-               gastos: extractNumber(row.Gastos || row.gastos || row['Despesas'] || 0),
-               aporte: extractNumber(row.Aporte || row.aporte || row['Investimento'] || 0),
-               saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'] || 0)
+               rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev'] || row.renda_dev || 0),
+               rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab'] || row.renda_contab || 0),
+               freelas: extractNumber(row.Freelas || row.freelas || row['Freelance'] || row.freelance || 0),
+               rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total'] || row.renda_total || 0),
+               gastos: extractNumber(row.Gastos || row.gastos || row['Despesas'] || row.despesas || 0),
+               aporte: extractNumber(row.Aporte || row.aporte || row['Investimento'] || row.investimento || 0),
+               saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'] || row.saldo_acum || 0)
              };
 
-             console.log(`Finance item ${index + 1}:`, financeItem); // Debug
+             console.log(`Created finance item ${index + 1}:`, financeItem);
              return financeItem;
-           }).filter(item => item !== null); // Filtrar itens nulos
+           });
            
            console.log('Final finance data:', financeData); // Debug
            
