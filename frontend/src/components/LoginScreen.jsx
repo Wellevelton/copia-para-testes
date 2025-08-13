@@ -48,7 +48,7 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/server/auth/login', {
+      const response = await fetch('https://backend-jb661i4r6-sobreiras-projects.vercel.app/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
       const googleUser = await googleAuth.signIn();
       
       // Enviar dados para o backend para autenticar
-      const response = await fetch('https://backend-kr5fp8biw-sobreiras-projects.vercel.app/api/auth/google', {
+      const response = await fetch('https://backend-jb661i4r6-sobreiras-projects.vercel.app/api/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
