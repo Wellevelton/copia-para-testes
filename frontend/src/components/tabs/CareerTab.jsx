@@ -36,7 +36,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
     }));
   };
 
-  const addCourse = () => {
+  const addCourse = async () => {
     if (newCourse.name && newCourse.cost) {
       const courseData = {
         name: newCourse.name,

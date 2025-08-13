@@ -11,7 +11,7 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
     setSelectedFile(file);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!selectedFile) return;
 
     const reader = new FileReader();
