@@ -228,7 +228,7 @@ const App = () => {
     setShowGoalsSetupModal(true);
   };
 
-  const handleGoalsSetupComplete = (goalsList) => {
+  const handleGoalsSetupComplete = async (goalsList) => {
     if (!pendingGoalData) return;
 
     // Calcular progresso inicial baseado nos goals
