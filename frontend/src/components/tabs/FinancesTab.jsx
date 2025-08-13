@@ -500,6 +500,7 @@ const FinancesTab = ({
 
   return (
     <div className="space-y-6">
+      {/* Abas de navegação - sempre visíveis */}
       <div className="flex gap-1 bg-gray-800 p-1 rounded-lg w-fit">
         {['transactions', 'budget', 'planning'].map(tab => (
           <button
@@ -516,8 +517,8 @@ const FinancesTab = ({
         ))}
       </div>
       
-      {/* Mostrar apenas a aba ativa */}
-      <div className="space-y-8">
+      {/* Conteúdo da aba ativa */}
+      <div>
         {activeSubTab === 'transactions' && renderTransactions()}
         {activeSubTab === 'budget' && renderBudget()}
         {activeSubTab === 'planning' && renderPlanning()}

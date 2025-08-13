@@ -137,8 +137,17 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
 
              console.log(`Row ${index + 1}:`, row); // Debug para ver os dados
 
+             // Construir o mês no formato correto (YYYY-MM)
+             const ano = row['ano'] || row.ano || '';
+             const mes = row['Mês'] || row.mes || row.Mes || '';
+             
+             if (!ano || !mes) {
+               console.log(`Skipping row ${index + 1}: missing ano or mes`);
+               return null;
+             }
+
              const financeItem = {
-               mes: row['Mês'] || row['Ms'] || row.mes || row.Mes || row.Month || '',
+               mes: `${ano}-${String(mes).padStart(2, '0')}`, // Formato: 2026-01, 2026-02, etc.
                rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev']),
                rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab']),
                freelas: extractNumber(row.Freelas || row.freelas || row['Freelance']),
@@ -249,9 +258,10 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                  </>
                                ) : (
                                    <>
-                   <p>• <strong>Planilha Financeira:</strong> Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
-                   <p>• <strong>Exemplo:</strong> "2026-01, 3500, 2500, 500, 6500, 2500, 4000, 4000"</p>
-                   <p>• <strong>Formato CSV:</strong> Primeira linha deve conter os cabeçalhos: Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
+                   <p>• <strong>Planilha Financeira:</strong> ano, Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
+                   <p>• <strong>Exemplo:</strong> "2026, 1, 3500, 2500, 500, 6500, 2500, 4000, 4000"</p>
+                   <p>• <strong>Formato CSV:</strong> Primeira linha deve conter os cabeçalhos: ano, Mês, Renda Dev, Renda Contab, Freelas, Renda Total, Gastos, Aporte, Saldo Acum.</p>
+                   <p>• <strong>Nota:</strong> O campo "Mês" deve ser um número de 1 a 12, o sistema irá converter automaticamente para o formato correto.</p>
                  </>
                 )}
              </div>

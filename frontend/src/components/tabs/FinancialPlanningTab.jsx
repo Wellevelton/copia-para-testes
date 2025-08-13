@@ -49,7 +49,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
     const filtered = planilhaFinanceiraState.filter(row => {
       if (!row.mes) return false;
       
-      // Suportar formatos: "2026-1", "2026-01", "2026-1-01"
+      // Formato esperado: "2026-01", "2026-02", etc.
       const parts = row.mes.split('-');
       const rowYear = parseInt(parts[0]);
       
