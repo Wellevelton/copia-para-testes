@@ -182,6 +182,62 @@ app.post('/api/auth/login', [
   }
 });
 
+// Autenticação Google
+app.post('/api/auth/google', [
+  body('idToken').notEmpty(),
+  body('email').isEmail().normalizeEmail(),
+  body('name').notEmpty().trim(),
+  body('googleId').notEmpty()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { idToken, email, name, googleId } = req.body;
+
+    // Verificar se usuário já existe
+    let user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      // Criar novo usuário se não existir
+      user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          googleId: googleId,
+          password: '' // Usuários Google não têm senha
+        }
+      });
+    } else {
+      // Atualizar googleId se usuário existir
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { googleId: googleId }
+      });
+    }
+
+    // Gerar token
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      user: { id: user.id, email: user.email, name: user.name },
+      token
+    });
+  } catch (error) {
+    console.error('Erro no login Google:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Goals
 app.get('/api/goals', authenticateToken, async (req, res) => {
   try {

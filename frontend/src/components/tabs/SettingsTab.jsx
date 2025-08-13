@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
-import { Settings, Import, FileText, Upload, Bell, Moon, Sun, Palette, Globe, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Import, FileText, Upload, Bell, Moon, Sun, Palette, Globe, Shield, Calendar } from 'lucide-react';
 import api from '../../services/api';
+import { googleAuth, googleCalendar, GOOGLE_CONFIG } from '../../config/google';
 
 const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraState, onBack }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [importType, setImportType] = useState('travels');
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+
+  // Verificar se Google está conectado
+  useEffect(() => {
+    const checkGoogleConnection = () => {
+      try {
+        const isConnected = googleAuth.isSignedIn();
+        setGoogleConnected(isConnected);
+      } catch (error) {
+        console.error('Erro ao verificar conexão Google:', error);
+        setGoogleConnected(false);
+      }
+    };
+
+    // Verificar a cada 5 segundos
+    const interval = setInterval(checkGoogleConnection, 5000);
+    checkGoogleConnection(); // Verificar imediatamente
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -218,6 +241,81 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
     reader.readAsText(selectedFile);
   };
 
+  // Função para conectar com Google Calendar
+  const handleGoogleCalendarConnect = async () => {
+    setGoogleLoading(true);
+    
+    try {
+      // Inicializar Google API se necessário
+      if (!window.gapi) {
+        throw new Error('Google API não carregada');
+      }
+
+      // Fazer login com Google se não estiver logado
+      if (!googleAuth.isSignedIn()) {
+        await googleAuth.signIn();
+      }
+
+      // Inicializar Calendar API
+      await googleCalendar.init();
+      
+      // Testar conexão listando eventos
+      const events = await googleCalendar.listEvents();
+      setCalendarEvents(events);
+      
+      setGoogleConnected(true);
+      alert('Google Calendar conectado com sucesso!');
+      
+    } catch (error) {
+      console.error('Erro ao conectar Google Calendar:', error);
+      alert('Erro ao conectar com Google Calendar. Verifique se você fez login com Google.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // Função para sincronizar eventos do Planner Pro com Google Calendar
+  const syncEventsToGoogleCalendar = async () => {
+    if (!googleConnected) {
+      alert('Conecte-se ao Google Calendar primeiro!');
+      return;
+    }
+
+    setGoogleLoading(true);
+    
+    try {
+      // Buscar eventos do Planner Pro (você pode adaptar isso)
+      const plannerEvents = [
+        // Exemplo de eventos - você pode buscar do seu backend
+        {
+          summary: 'Reunião de Planejamento',
+          description: 'Discussão sobre metas do mês',
+          start: {
+            dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Amanhã
+            timeZone: 'America/Sao_Paulo'
+          },
+          end: {
+            dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // Amanhã + 1 hora
+            timeZone: 'America/Sao_Paulo'
+          }
+        }
+      ];
+
+      // Criar eventos no Google Calendar
+      for (const event of plannerEvents) {
+        await googleCalendar.createEvent(event);
+      }
+
+      alert(`${plannerEvents.length} eventos sincronizados com Google Calendar!`);
+      
+    } catch (error) {
+      console.error('Erro ao sincronizar eventos:', error);
+      alert('Erro ao sincronizar eventos com Google Calendar.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -303,6 +401,74 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                 )}
              </div>
            </div>
+        </div>
+      </div>
+
+      {/* Integração Google Calendar */}
+      <div className="bg-gray-800 rounded-xl p-8 shadow-lg">
+        <h3 className="text-white font-semibold mb-6 text-xl flex items-center gap-3">
+          <Calendar className="text-green-400" size={24} />
+          Integração Google Calendar
+        </h3>
+        
+        <div className="space-y-6">
+          <div className="flex items-center justify-between bg-gray-700 p-4 rounded-lg">
+            <div>
+              <h4 className="text-white font-medium">Status da Conexão</h4>
+              <p className="text-gray-400 text-sm">
+                {googleConnected ? 'Conectado ao Google Calendar' : 'Não conectado'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${googleConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-sm text-gray-400">
+                {googleConnected ? 'Online' : 'Offline'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleGoogleCalendarConnect}
+              disabled={googleLoading}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+            >
+              <Calendar size={20} />
+              {googleLoading ? 'Conectando...' : googleConnected ? 'Reconectar' : 'Conectar Google Calendar'}
+            </button>
+            
+            {googleConnected && (
+              <button
+                onClick={syncEventsToGoogleCalendar}
+                disabled={googleLoading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                <Upload size={20} />
+                {googleLoading ? 'Sincronizando...' : 'Sincronizar Eventos'}
+              </button>
+            )}
+          </div>
+
+          {calendarEvents.length > 0 && (
+            <div className="bg-gray-700 rounded-lg p-4">
+              <h4 className="text-white font-medium mb-3">Eventos do Google Calendar</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {calendarEvents.slice(0, 5).map((event, index) => (
+                  <div key={index} className="bg-gray-600 p-3 rounded-lg">
+                    <h5 className="text-white font-medium">{event.summary}</h5>
+                    <p className="text-gray-300 text-sm">
+                      {new Date(event.start?.dateTime || event.start?.date).toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {calendarEvents.length > 5 && (
+                <p className="text-gray-400 text-sm mt-2">
+                  Mostrando 5 de {calendarEvents.length} eventos
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

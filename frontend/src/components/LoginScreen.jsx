@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { googleAuth, GOOGLE_CONFIG } from '../config/google';
 
 const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,31 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleInitialized, setGoogleInitialized] = useState(false);
+
+  // Inicializar Google API quando o componente montar
+  useEffect(() => {
+    const initGoogle = async () => {
+      try {
+        await googleAuth.init();
+        setGoogleInitialized(true);
+      } catch (error) {
+        console.error('Erro ao inicializar Google API:', error);
+      }
+    };
+
+    if (window.gapi) {
+      initGoogle();
+    } else {
+      // Aguardar o script do Google carregar
+      const checkGoogleAPI = setInterval(() => {
+        if (window.gapi) {
+          clearInterval(checkGoogleAPI);
+          initGoogle();
+        }
+      }, 100);
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -48,11 +74,40 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
   };
 
   const handleGoogleLogin = async () => {
+    if (!googleInitialized) {
+      alert('Google API ainda não foi inicializada. Aguarde um momento.');
+      return;
+    }
+
     setIsGoogleLoading(true);
     
     try {
-      // Redirecionar para o backend para iniciar o fluxo OAuth
-      window.location.href = '/api/server/auth/google';
+      // Fazer login com Google
+      const googleUser = await googleAuth.signIn();
+      
+      // Enviar dados para o backend para autenticar
+      const response = await fetch('https://backend-kr5fp8biw-sobreiras-projects.vercel.app/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: googleUser.idToken,
+          email: googleUser.email,
+          name: googleUser.name,
+          googleId: googleUser.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        onLogin(data.user);
+      } else {
+        alert(data.error || 'Erro no login com Google');
+      }
     } catch (error) {
       console.error('Erro no login Google:', error);
       alert('Erro ao conectar com Google. Tente novamente.');
