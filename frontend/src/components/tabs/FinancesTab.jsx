@@ -516,11 +516,11 @@ const FinancesTab = ({
         ))}
       </div>
       
-      {/* Mostrar todas as abas sempre */}
+      {/* Mostrar apenas a aba ativa */}
       <div className="space-y-8">
-        {renderTransactions()}
-        {renderBudget()}
-        {renderPlanning()}
+        {activeSubTab === 'transactions' && renderTransactions()}
+        {activeSubTab === 'budget' && renderBudget()}
+        {activeSubTab === 'planning' && renderPlanning()}
       </div>
 
       {/* Modal Nova Transação */}
