@@ -15,7 +15,7 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
     if (!selectedFile) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const csvData = e.target.result;
         console.log('Raw CSV data:', csvData.substring(0, 500)); // Debug: mostrar primeiros 500 caracteres
