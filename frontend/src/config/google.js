@@ -1,7 +1,7 @@
 // Google OAuth Configuration
 export const GOOGLE_CONFIG = {
   // Google OAuth 2.0 Client ID
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID', // Você precisa criar no Google Cloud Console
+  CLIENT_ID: '509118090977-mbgabinfll0hd1ug638u8kqora15nekh.apps.googleusercontent.com',
   
   // Scopes necessários
   SCOPES: [
@@ -15,7 +15,7 @@ export const GOOGLE_CONFIG = {
   DISCOVERY_DOCS: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
   
   // API Key para Calendar API
-  API_KEY: 'YOUR_GOOGLE_API_KEY' // Você precisa criar no Google Cloud Console
+  API_KEY: 'AIzaSyCbhkUWZZL6jE8ox4QK6O-2-aQF-d4QZtI'
 };
 
 // Google OAuth Helper Functions
