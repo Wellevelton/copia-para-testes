@@ -143,11 +143,15 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                return result;
              };
 
+             // Debug: mostrar todas as chaves disponíveis
+             console.log(`Row ${index + 1} keys:`, Object.keys(row));
+             console.log(`Row ${index + 1} values:`, row);
+             
              // Baseado na estrutura da sua planilha: Mês já contém ano-mês (ex: 2026-01)
-             const mesCompleto = row['Mês'] || row.mes || row.Mês || '';
+             const mesCompleto = row['Mês'] || row.mes || row.Mês || row['Ms'] || '';
              
              if (!mesCompleto) {
-               console.log(`Skipping row ${index + 1}: missing Mês field`);
+               console.log(`Skipping row ${index + 1}: missing Mês field. Available keys:`, Object.keys(row));
                return null;
              }
 

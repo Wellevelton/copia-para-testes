@@ -30,7 +30,8 @@ app.use(cors({
     'https://planner-p0cw8rgqx-sobreiras-projects.vercel.app', 
     'https://planner-pro-frontend.netlify.app',
     'https://frontend-37f6fuhhi-sobreiras-projects.vercel.app',
-    'https://frontend-31iwn2g5r-sobreiras-projects.vercel.app'
+    'https://frontend-31iwn2g5r-sobreiras-projects.vercel.app',
+    'https://frontend-prz0ik3kn-sobreiras-projects.vercel.app'
   ],
   credentials: true
 }));
