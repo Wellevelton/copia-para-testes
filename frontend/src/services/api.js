@@ -2,7 +2,7 @@
 // Centralized API calls to backend
 
 // BACKEND URL - VERCEL API
-const API_BASE_URL = 'https://backend-d18i0khgn-sobreiras-projects.vercel.app';
+const API_BASE_URL = 'https://backend-kr5fp8biw-sobreiras-projects.vercel.app';
 
 // Token management
 const getToken = () => {
