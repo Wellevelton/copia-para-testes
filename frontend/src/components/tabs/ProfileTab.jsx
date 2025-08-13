@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Camera, Save, Edit } from 'lucide-react';
+import apiService from '../../services/api';
 
 const ProfileTab = ({ careerPlanning, setCareerPlanning, onBack }) => {
   const [isEditing, setIsEditing] = useState(false);

@@ -4,6 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { useTheme } from '../../contexts/ThemeContext';
+import apiService from '../../services/api';
 
 const ReportsDashboard = () => {
   const { theme } = useTheme();
@@ -49,7 +50,44 @@ const ReportsDashboard = () => {
   };
 
   useEffect(() => {
-    setData(mockData);
+    const loadData = async () => {
+      try {
+        // Carregar dados reais do backend
+        const [projectsData, goalsData, financesData] = await Promise.all([
+          apiService.projects.getAll().catch(() => ({ data: [] })),
+          apiService.goals.getAll().catch(() => ({ data: [] })),
+          apiService.finances.getAll().catch(() => ({ data: [] }))
+        ]);
+
+        // Processar dados para o formato dos gráficos
+        const processedData = {
+          finances: financesData.data?.map(item => ({
+            month: item.date?.split('-')[1] || 'Jan',
+            income: item.amount > 0 ? item.amount : 0,
+            expenses: item.amount < 0 ? Math.abs(item.amount) : 0,
+            savings: 0
+          })) || mockData.finances,
+          projects: projectsData.data?.map(item => ({
+            name: item.title,
+            progress: item.progress || 0,
+            deadline: item.dueDate
+          })) || mockData.projects,
+          goals: goalsData.data?.map(item => ({
+            name: item.title,
+            completed: item.progress || 0,
+            total: 100
+          })) || mockData.goals,
+          productivity: mockData.productivity // Manter dados mock para produtividade
+        };
+
+        setData(processedData);
+      } catch (error) {
+        console.error('Erro ao carregar dados dos relatórios:', error);
+        setData(mockData); // Fallback para dados mock
+      }
+    };
+
+    loadData();
   }, []);
 
   const tabs = [

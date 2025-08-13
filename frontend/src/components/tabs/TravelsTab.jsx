@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Globe, Calendar, Hotel, DollarSign, MapPin, Star, Plane, ChevronLeft, ChevronRight } from 'lucide-react';
+import apiService from '../../services/api';
 
 const TravelsTab = ({ 
   travels, 

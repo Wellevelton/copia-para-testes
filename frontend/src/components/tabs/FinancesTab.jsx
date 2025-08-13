@@ -3,6 +3,7 @@ import { Plus, Import, Save, DollarSign, TrendingUp, AlertCircle, Edit, Target, 
 import { formatCurrency } from '../../utils/formatters';
 import NewTransactionModal from '../modals/NewTransactionModal';
 import FinancialPlanningTab from './FinancialPlanningTab';
+import apiService from '../../services/api';
 
 const FinancesTab = ({ 
   activeSubTab, 
@@ -72,8 +73,16 @@ const FinancesTab = ({
     return getTotalIncome() - getTotalExpenses();
   };
 
-  const addNewTransaction = (transaction) => {
-    setFinances(prev => [...prev, transaction]);
+  const addNewTransaction = async (transaction) => {
+    try {
+      // Salvar no backend
+      const savedTransaction = await apiService.finances.create(transaction);
+      setFinances(prev => [...prev, savedTransaction.data]);
+    } catch (error) {
+      console.error('Erro ao salvar transação no backend:', error);
+      // Fallback para localStorage
+      setFinances(prev => [...prev, transaction]);
+    }
     setShowNewTransactionModal(false);
   };
 

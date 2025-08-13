@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Upload, Plus, Trash2, Edit, Save, X } from 'lucide-react';
+import api from '../../services/api';
 
 const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraState }) => {
   const [showImportModal, setShowImportModal] = useState(false);
@@ -42,6 +43,24 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
       const finalData = calculateSaldoAcum(updatedData);
       setPlanilhaFinanceiraState(finalData);
     }
+  }, []);
+
+  // Carregar dados do backend ao montar o componente
+  useEffect(() => {
+    const loadDataFromBackend = async () => {
+      try {
+        const response = await api.financialPlanning.getAll();
+        if (response.data) {
+          console.log('Dados carregados do backend:', response.data);
+          setPlanilhaFinanceiraState(response.data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do backend:', error);
+        // Fallback para dados locais
+      }
+    };
+
+    loadDataFromBackend();
   }, []);
 
   // Filtrar dados por ano

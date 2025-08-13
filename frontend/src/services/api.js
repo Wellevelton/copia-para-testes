@@ -2,7 +2,7 @@
 // Centralized API calls to backend
 
 // BACKEND URL - VERCEL API
-const API_BASE_URL = 'https://backend-fzr1w9zbk-sobreiras-projects.vercel.app';
+const API_BASE_URL = 'https://backend-d3tni1hna-sobreiras-projects.vercel.app';
 
 // Token management
 const getToken = () => {
@@ -51,7 +51,7 @@ export const apiService = {
   // Auth API
   auth: {
     login: async (credentials) => {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export const apiService = {
     },
 
     register: async (userData) => {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

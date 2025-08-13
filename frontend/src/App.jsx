@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useStoredState } from './hooks/useStoredState';
 import { 
   initialProjects, 
   initialFinances, 
@@ -12,6 +11,7 @@ import {
 } from './data/initialData';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { notificationService } from './services/notifications';
+import apiService from './services/api';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 import ProjectsTab from './components/tabs/ProjectsTab';
@@ -63,21 +63,42 @@ const App = () => {
   const [showEditTravelModal, setShowEditTravelModal] = useState(false);
   const [showNewTravelModal, setShowNewTravelModal] = useState(false);
 
-  // Estados com useStoredState
-  const [projects, setProjects] = useStoredState('projects', initialProjects);
-  const [finances, setFinances] = useStoredState('finances', initialFinances);
-  const [budget, setBudget] = useStoredState('budget', initialBudget);
-  const [goals, setGoals] = useStoredState('goals', initialGoals);
-  const [travels, setTravels] = useStoredState('travels', initialTravels);
-  const [careerPlanning, setCareerPlanning] = useStoredState('careerPlanning', initialCareerPlanning);
-  const [calendarEvents, setCalendarEvents] = useStoredState('calendarEvents', initialCalendarEvents);
-  const [viagensDataState, setViagensDataState] = useStoredState('viagensData', initialTravels);
-  const [planilhaFinanceiraState, setPlanilhaFinanceiraState] = useStoredState('planilhaFinanceira', planilhaFinanceira);
+  // Estados com dados do backend
+  const [projects, setProjects] = useState([]);
+  const [finances, setFinances] = useState([]);
+  const [budget, setBudget] = useState(initialBudget);
+  const [goals, setGoals] = useState([]);
+  const [travels, setTravels] = useState([]);
+  const [careerPlanning, setCareerPlanning] = useState(initialCareerPlanning);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [viagensDataState, setViagensDataState] = useState([]);
+  const [planilhaFinanceiraState, setPlanilhaFinanceiraState] = useState([]);
 
-  // Função para limpar localStorage e carregar dados iniciais
-  const resetToInitialData = () => {
-    localStorage.clear();
-    window.location.reload();
+  // Função para limpar dados e recarregar do backend
+  const resetToInitialData = async () => {
+    try {
+      // Recarregar dados do backend
+      const [projectsData, goalsData, financesData, travelsData, calendarData, financialPlanningData] = await Promise.all([
+        apiService.projects.getAll().catch(() => ({ data: [] })),
+        apiService.goals.getAll().catch(() => ({ data: [] })),
+        apiService.finances.getAll().catch(() => ({ data: [] })),
+        apiService.travels.getAll().catch(() => ({ data: [] })),
+        apiService.calendar.getAll().catch(() => ({ data: [] })),
+        apiService.financialPlanning.getAll().catch(() => ({ data: [] }))
+      ]);
+
+      // Atualizar estados
+      if (projectsData.data) setProjects(projectsData.data);
+      if (goalsData.data) setGoals(goalsData.data);
+      if (financesData.data) setFinances(financesData.data);
+      if (travelsData.data) setTravels(travelsData.data);
+      if (calendarData.data) setCalendarEvents(calendarData.data);
+      if (financialPlanningData.data) setPlanilhaFinanceiraState(financialPlanningData.data);
+
+      console.log('Dados recarregados do backend!');
+    } catch (error) {
+      console.error('Erro ao recarregar dados:', error);
+    }
   };
 
   // Função para lidar com login
@@ -85,12 +106,18 @@ const App = () => {
     console.log('Login realizado:', loginData);
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
+    
+    // Salvar token se fornecido
+    if (loginData.token) {
+      apiService.setToken(loginData.token);
+    }
   };
 
   // Função para logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem('isLoggedIn');
+    apiService.setToken(null); // Limpar token
   };
 
   // Verificar se há login salvo ao carregar a página
@@ -101,6 +128,39 @@ const App = () => {
     }
   }, []);
 
+  // Carregar dados do backend quando logado
+  useEffect(() => {
+    if (isLoggedIn) {
+      const loadDataFromBackend = async () => {
+        try {
+          // Carregar todos os dados do backend
+          const [projectsData, goalsData, financesData, travelsData, calendarData, financialPlanningData] = await Promise.all([
+            apiService.projects.getAll().catch(() => ({ data: [] })),
+            apiService.goals.getAll().catch(() => ({ data: [] })),
+            apiService.finances.getAll().catch(() => ({ data: [] })),
+            apiService.travels.getAll().catch(() => ({ data: [] })),
+            apiService.calendar.getAll().catch(() => ({ data: [] })),
+            apiService.financialPlanning.getAll().catch(() => ({ data: [] }))
+          ]);
+
+          // Atualizar estados com dados do backend
+          if (projectsData.data) setProjects(projectsData.data);
+          if (goalsData.data) setGoals(goalsData.data);
+          if (financesData.data) setFinances(financesData.data);
+          if (travelsData.data) setTravels(travelsData.data);
+          if (calendarData.data) setCalendarEvents(calendarData.data);
+          if (financialPlanningData.data) setPlanilhaFinanceiraState(financialPlanningData.data);
+
+          console.log('Dados carregados do backend com sucesso!');
+        } catch (error) {
+          console.error('Erro ao carregar dados do backend:', error);
+        }
+      };
+
+      loadDataFromBackend();
+    }
+  }, [isLoggedIn]);
+
   // Inicializar serviços
   useEffect(() => {
     if (isLoggedIn) {
@@ -109,21 +169,7 @@ const App = () => {
     }
   }, [isLoggedIn]);
 
-  // Salvar dados automaticamente
-  useEffect(() => {
-    if (isLoggedIn) {
-      const saveData = () => {
-        localStorage.setItem('projects', JSON.stringify(projects));
-        localStorage.setItem('finances', JSON.stringify(finances));
-        localStorage.setItem('goals', JSON.stringify(goals));
-        localStorage.setItem('travels', JSON.stringify(travels));
-        localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
-        localStorage.setItem('planilhaFinanceira', JSON.stringify(planilhaFinanceiraState));
-      };
-      
-      saveData();
-    }
-  }, [projects, finances, goals, travels, calendarEvents, planilhaFinanceiraState, isLoggedIn]);
+  // Os dados agora são salvos diretamente no backend quando modificados
 
   // Funções auxiliares
   const getEventsForDate = (date) => {
@@ -192,18 +238,26 @@ const App = () => {
     // Criar a meta com os goals
     const newGoal = {
       ...pendingGoalData,
-      id: Date.now(),
       progress: progress,
       totalGoals: goalsList.length,
       goals: goalsList,
       createdAt: new Date().toISOString(),
       type: 'goal'
     };
-    setGoals([...goals, newGoal]);
+
+    // Salvar no backend
+    try {
+      const savedGoal = await apiService.goals.create(newGoal);
+      setGoals([...goals, savedGoal.data]);
+    } catch (error) {
+      console.error('Erro ao salvar meta no backend:', error);
+      // Fallback para localStorage
+      newGoal.id = Date.now();
+      setGoals([...goals, newGoal]);
+    }
 
     // Criar um projeto baseado na meta
     const newProject = {
-      id: Date.now() + 1,
       title: pendingGoalData.title,
       description: pendingGoalData.description,
       status: 'todo',
@@ -219,19 +273,39 @@ const App = () => {
       goalId: newGoal.id,
       goals: goalsList // Incluir os goals no projeto para sincronização
     };
-    setProjects([...projects, newProject]);
+
+    // Salvar projeto no backend
+    try {
+      const savedProject = await apiService.projects.create(newProject);
+      setProjects([...projects, savedProject.data]);
+    } catch (error) {
+      console.error('Erro ao salvar projeto no backend:', error);
+      // Fallback para localStorage
+      newProject.id = Date.now() + 1;
+      setProjects([...projects, newProject]);
+    }
 
     // Adicionar evento no calendário para a data da meta
     const calendarEvent = {
-      id: Date.now() + 2,
       title: `🎯 ${pendingGoalData.title}`,
       description: pendingGoalData.description,
-      date: pendingGoalData.dueDate,
+      startDate: pendingGoalData.dueDate,
+      endDate: pendingGoalData.dueDate,
       type: 'goal',
       goalId: newGoal.id,
       priority: pendingGoalData.priority
     };
-    setCalendarEvents([...calendarEvents, calendarEvent]);
+
+    // Salvar evento no backend
+    try {
+      const savedEvent = await apiService.calendar.create(calendarEvent);
+      setCalendarEvents([...calendarEvents, savedEvent.data]);
+    } catch (error) {
+      console.error('Erro ao salvar evento no backend:', error);
+      // Fallback para localStorage
+      calendarEvent.id = Date.now() + 2;
+      setCalendarEvents([...calendarEvents, calendarEvent]);
+    }
 
     // Limpar dados pendentes e fechar modais
     setPendingGoalData(null);

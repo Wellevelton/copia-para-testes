@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Settings, Import, FileText, Upload, Bell, Moon, Sun, Palette, Globe, Shield } from 'lucide-react';
+import api from '../../services/api';
 
 const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraState, onBack }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -137,38 +138,66 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
 
              console.log(`Row ${index + 1}:`, row); // Debug para ver os dados
 
-             // Construir o mês no formato correto (YYYY-MM)
-             const ano = row['ano'] || row.ano || '';
-             const mes = row['Mês'] || row.mes || row.Mes || '';
+             // Tentar diferentes formatos de mês
+             let mes = '';
              
-             if (!ano || !mes) {
-               console.log(`Skipping row ${index + 1}: missing ano or mes`);
+             // Se tem coluna 'mes' direta
+             if (row.mes) {
+               mes = row.mes;
+             }
+             // Se tem ano e mês separados
+             else if (row.ano && row['Mês']) {
+               mes = `${row.ano}-${String(row['Mês']).padStart(2, '0')}`;
+             }
+             // Se tem formato YYYY-MM
+             else if (row['Mês'] && row['Mês'].includes('-')) {
+               mes = row['Mês'];
+             }
+             // Se tem apenas mês como número
+             else if (row['Mês']) {
+               const currentYear = new Date().getFullYear();
+               mes = `${currentYear}-${String(row['Mês']).padStart(2, '0')}`;
+             }
+
+             if (!mes) {
+               console.log(`Skipping row ${index + 1}: no valid month found`);
                return null;
              }
 
              const financeItem = {
-               mes: `${ano}-${String(mes).padStart(2, '0')}`, // Formato: 2026-01, 2026-02, etc.
-               rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev']),
-               rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab']),
-               freelas: extractNumber(row.Freelas || row.freelas || row['Freelance']),
-               rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total']),
-               gastos: extractNumber(row.Gastos || row.gastos || row['Despesas']),
-               aporte: extractNumber(row.Aporte || row.aporte || row['Investimento']),
-               saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'])
+               mes: mes,
+               rendaDev: extractNumber(row['Renda Dev'] || row['RendaDev'] || row.rendaDev || row.RendaDev || row['Renda_Dev'] || 0),
+               rendaContab: extractNumber(row['Renda Contab'] || row['RendaContab'] || row.rendaContab || row.RendaContab || row['Renda_Contab'] || 0),
+               freelas: extractNumber(row.Freelas || row.freelas || row['Freelance'] || 0),
+               rendaTotal: extractNumber(row['Renda Total'] || row['RendaTotal'] || row.rendaTotal || row.RendaTotal || row['Renda_Total'] || 0),
+               gastos: extractNumber(row.Gastos || row.gastos || row['Despesas'] || 0),
+               aporte: extractNumber(row.Aporte || row.aporte || row['Investimento'] || 0),
+               saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'] || 0)
              };
-
-             // Validar se o item tem dados válidos
-             if (!financeItem.mes || financeItem.mes.trim() === '') {
-               console.log(`Skipping row ${index + 1}: empty month`);
-               return null;
-             }
 
              console.log(`Finance item ${index + 1}:`, financeItem); // Debug
              return financeItem;
            }).filter(item => item !== null); // Filtrar itens nulos
            
            console.log('Final finance data:', financeData); // Debug
-           setPlanilhaFinanceiraState(financeData);
+           
+           // Salvar no backend
+           try {
+             // Primeiro, limpar dados existentes (opcional)
+             // await api.financialPlanning.clear();
+             
+             // Salvar cada item no backend
+             for (const item of financeData) {
+               await api.financialPlanning.create(item);
+             }
+             
+             console.log('Dados salvos no backend com sucesso!');
+             setPlanilhaFinanceiraState(financeData);
+           } catch (error) {
+             console.error('Erro ao salvar no backend:', error);
+             // Fallback para localStorage
+             setPlanilhaFinanceiraState(financeData);
+           }
          }
 
         alert(`${importType === 'travels' ? 'Viagens' : 'Transações financeiras'} importadas com sucesso!`);

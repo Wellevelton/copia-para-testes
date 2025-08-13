@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit, Save, X, Plus, Trash2 } from 'lucide-react';
+import apiService from '../../services/api';
 
 const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditingCareer, finances, setFinances }) => {
   const [editingSection, setEditingSection] = useState(null);
@@ -52,14 +53,23 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
       if (newCourse.cost && newCourse.cost !== 'R$ 0') {
         const costValue = parseFloat(newCourse.cost.replace('R$ ', '').replace(',', '.'));
         const newTransaction = {
-          id: Date.now(),
           description: `Curso: ${newCourse.name}`,
           amount: -costValue,
           category: 'Educação',
           date: new Date().toISOString().split('T')[0],
           type: 'expense'
         };
-        setFinances(prev => [...prev, newTransaction]);
+
+        // Salvar transação no backend
+        try {
+          const savedTransaction = await apiService.finances.create(newTransaction);
+          setFinances(prev => [...prev, savedTransaction.data]);
+        } catch (error) {
+          console.error('Erro ao salvar transação no backend:', error);
+          // Fallback para localStorage
+          newTransaction.id = Date.now();
+          setFinances(prev => [...prev, newTransaction]);
+        }
       }
 
       setNewCourse({ name: '', cost: '', status: 'Em Progresso' });
