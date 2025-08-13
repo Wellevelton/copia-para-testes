@@ -148,9 +148,15 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                saldoAcum: extractNumber(row['Saldo Acum.'] || row['Saldo Acum'] || row['SaldoAcum'] || row.saldoAcum || row.SaldoAcum || row['Saldo_Acum'])
              };
 
+             // Validar se o item tem dados válidos
+             if (!financeItem.mes || financeItem.mes.trim() === '') {
+               console.log(`Skipping row ${index + 1}: empty month`);
+               return null;
+             }
+
              console.log(`Finance item ${index + 1}:`, financeItem); // Debug
              return financeItem;
-           });
+           }).filter(item => item !== null); // Filtrar itens nulos
            
            console.log('Final finance data:', financeData); // Debug
            setPlanilhaFinanceiraState(financeData);

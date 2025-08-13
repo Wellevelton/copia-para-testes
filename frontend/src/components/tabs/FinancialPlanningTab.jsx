@@ -47,9 +47,17 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
   // Filtrar dados por ano
   useEffect(() => {
     const filtered = planilhaFinanceiraState.filter(row => {
-      const rowYear = parseInt(row.mes?.split('-')[0]);
+      if (!row.mes) return false;
+      
+      // Suportar formatos: "2026-1", "2026-01", "2026-1-01"
+      const parts = row.mes.split('-');
+      const rowYear = parseInt(parts[0]);
+      
+      console.log(`Filtering: ${row.mes} -> year: ${rowYear}, currentYear: ${currentYear}`);
       return rowYear === currentYear;
     });
+    
+    console.log(`Filtered data for year ${currentYear}:`, filtered);
     setFilteredData(filtered);
   }, [currentYear, planilhaFinanceiraState]);
 
