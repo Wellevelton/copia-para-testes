@@ -143,17 +143,21 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
                return result;
              };
 
-             // Baseado na estrutura da sua planilha: ano e Mês separados
-             const ano = row.ano || row['ano'] || '';
-             const mes = row['Mês'] || row.mes || row.Mês || '';
+             // Baseado na estrutura da sua planilha: Mês já contém ano-mês (ex: 2026-01)
+             const mesCompleto = row['Mês'] || row.mes || row.Mês || '';
              
-             if (!ano || !mes) {
-               console.log(`Skipping row ${index + 1}: missing ano or mes`);
+             if (!mesCompleto) {
+               console.log(`Skipping row ${index + 1}: missing Mês field`);
                return null;
              }
 
-             // Formato: YYYY-MM (ex: 2026-01, 2026-02)
-             const mesFormatado = `${ano}-${String(mes).padStart(2, '0')}`;
+             // Verificar se o formato está correto (YYYY-MM)
+             if (!/^\d{4}-\d{2}$/.test(mesCompleto)) {
+               console.log(`Skipping row ${index + 1}: invalid date format ${mesCompleto}`);
+               return null;
+             }
+
+             const mesFormatado = mesCompleto; // Já está no formato correto
 
              const financeItem = {
                mes: mesFormatado,

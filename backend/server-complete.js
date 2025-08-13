@@ -29,7 +29,8 @@ app.use(cors({
     'http://localhost:5173', 
     'https://planner-p0cw8rgqx-sobreiras-projects.vercel.app', 
     'https://planner-pro-frontend.netlify.app',
-    'https://frontend-37f6fuhhi-sobreiras-projects.vercel.app'
+    'https://frontend-37f6fuhhi-sobreiras-projects.vercel.app',
+    'https://frontend-31iwn2g5r-sobreiras-projects.vercel.app'
   ],
   credentials: true
 }));
