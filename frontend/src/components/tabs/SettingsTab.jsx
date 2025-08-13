@@ -147,21 +147,36 @@ const SettingsTab = ({ setViagensDataState, setFinances, setPlanilhaFinanceiraSt
              console.log(`Row ${index + 1} keys:`, Object.keys(row));
              console.log(`Row ${index + 1} values:`, row);
              
-             // Baseado na estrutura da sua planilha: Mês já contém ano-mês (ex: 2026-01)
+             // Suportar dois formatos de planilha:
+             // 1. Mês com acento (ex: 2026-01)
+             // 2. ano e Mes separados (ex: ano=2026, Mes=1)
+             
+             let mesFormatado = '';
+             
+             // Formato 1: Mês já contém ano-mês (ex: 2026-01)
              const mesCompleto = row['Mês'] || row.mes || row.Mês || row['Ms'] || '';
              
-             if (!mesCompleto) {
-               console.log(`Skipping row ${index + 1}: missing Mês field. Available keys:`, Object.keys(row));
+             if (mesCompleto && /^\d{4}-\d{2}$/.test(mesCompleto)) {
+               mesFormatado = mesCompleto;
+             } 
+             // Formato 2: ano e Mes separados
+             else if (row.ano && row.Mes) {
+               const ano = row.ano;
+               const mes = String(row.Mes).padStart(2, '0');
+               mesFormatado = `${ano}-${mes}`;
+             }
+             // Formato 2 alternativo: ano e mes (minúsculo)
+             else if (row.ano && row.mes) {
+               const ano = row.ano;
+               const mes = String(row.mes).padStart(2, '0');
+               mesFormatado = `${ano}-${mes}`;
+             }
+             
+             if (!mesFormatado) {
+               console.log(`Skipping row ${index + 1}: cannot parse date. Available keys:`, Object.keys(row));
+               console.log(`Row values:`, row);
                return null;
              }
-
-             // Verificar se o formato está correto (YYYY-MM)
-             if (!/^\d{4}-\d{2}$/.test(mesCompleto)) {
-               console.log(`Skipping row ${index + 1}: invalid date format ${mesCompleto}`);
-               return null;
-             }
-
-             const mesFormatado = mesCompleto; // Já está no formato correto
 
              const financeItem = {
                mes: mesFormatado,
