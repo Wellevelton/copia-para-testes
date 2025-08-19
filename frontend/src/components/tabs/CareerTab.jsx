@@ -65,10 +65,9 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
           const savedTransaction = await apiService.finances.create(newTransaction);
           setFinances(prev => [...prev, savedTransaction.data]);
         } catch (error) {
-          console.error('Erro ao salvar transação no backend:', error);
-          // Fallback para localStorage
-          newTransaction.id = Date.now();
-          setFinances(prev => [...prev, newTransaction]);
+          console.error('❌ Erro ao salvar transação no backend:', error);
+          alert('❌ Erro ao salvar transação. Verifique sua conexão.');
+          return; // Não salvar localmente se backend falhar
         }
       }
 
@@ -119,8 +118,8 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
     return <div className="text-white">Carregando dados de carreira...</div>;
   }
 
-  return (
-    <div className="space-y-6">
+                                                                                                                       return (
+           <div className="space-y-4 md:space-y-6 auto-scroll" style={{maxHeight: 'calc(100vh - 200px)', paddingBottom: '2rem'}}>
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Planejamento de Carreira</h2>
         <div className="flex gap-2">
@@ -153,7 +152,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
         </div>
       </div>
 
-      <div className="bg-gray-800 rounded-xl p-6">
+      <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-4 md:p-6 border border-gray-700/30">
         <h3 className="text-xl font-semibold text-white mb-4">Jornada Profissional</h3>
         
         <div className="flex items-center justify-between mb-4">
@@ -221,7 +220,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
         </div>
       </div>
 
-      <div className="bg-gray-800 rounded-xl p-6">
+      <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-gray-700/30">
         <h3 className="text-xl font-semibold text-white mb-4">Desenvolvimento de Competências</h3>
         
         <div className="space-y-4">
@@ -272,7 +271,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gray-800 rounded-xl p-6">
+        <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-4 md:p-6 border border-gray-700/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Certificações</h3>
             {editingCareer && (
@@ -352,7 +351,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
           )}
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6">
+        <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-4 md:p-6 border border-gray-700/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Cursos</h3>
             {editingCareer && (
@@ -436,7 +435,7 @@ const CareerTab = ({ careerPlanning, setCareerPlanning, editingCareer, setEditin
         </div>
       </div>
 
-      <div className="bg-gray-800 rounded-xl p-6">
+      <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-gray-700/30">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-white">Cronograma de Marcos</h3>
           {editingCareer && (

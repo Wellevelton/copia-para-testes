@@ -89,3 +89,4 @@ prisma/migrations/
 *.backup
 *.bak
 .vercel
+

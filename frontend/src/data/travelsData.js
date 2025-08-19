@@ -1,5 +1,5 @@
 // Dados completos da planilha de viagens - 52 viagens
-export const viagensData = [];
+export const viagensData = [
   { 
     id: 1, 
     semana: 1,
@@ -674,4 +674,6 @@ export const viagensData = [];
     bimentos: 130,
     cidades: 170,
     notes: 62
+  }
+];
 

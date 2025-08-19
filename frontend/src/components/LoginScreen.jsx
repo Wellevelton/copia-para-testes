@@ -18,22 +18,25 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
       try {
         await googleAuth.init();
         setGoogleInitialized(true);
+        console.log('Google API inicializada com sucesso!');
       } catch (error) {
         console.error('Erro ao inicializar Google API:', error);
       }
     };
 
-    if (window.gapi) {
-      initGoogle();
-    } else {
-      // Aguardar o script do Google carregar
-      const checkGoogleAPI = setInterval(() => {
-        if (window.gapi) {
-          clearInterval(checkGoogleAPI);
-          initGoogle();
-        }
-      }, 100);
-    }
+    // Aguardar o script do Google Identity Services carregar
+    const checkGoogleAPI = setInterval(() => {
+      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+        clearInterval(checkGoogleAPI);
+        initGoogle();
+      }
+    }, 100);
+    
+    // Timeout após 15 segundos
+    setTimeout(() => {
+      clearInterval(checkGoogleAPI);
+      console.error('Timeout ao carregar Google Identity Services');
+    }, 15000);
   }, []);
 
   const handleChange = (e) => {
@@ -48,7 +51,11 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://backend-jb661i4r6-sobreiras-projects.vercel.app/api/auth/login', {
+      console.log('=== FRONTEND LOGIN ATTEMPT ===');
+      console.log('Form data:', formData);
+      console.log('Making fetch request to Vercel backend...');
+      
+      const response = await fetch('https://backend-clean-steel.vercel.app/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,21 +63,39 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
         body: JSON.stringify(formData),
       });
 
+      console.log('Response received:', response.status, response.statusText);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         onLogin(data.user);
       } else {
+        console.log('Login failed:', data.error);
         alert(data.error || 'Erro no login');
       }
     } catch (error) {
-      console.error('Erro no login:', error);
+      console.error('=== FRONTEND LOGIN ERROR ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
       alert('Erro de conexão. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Função temporária para login rápido (para testar)
+  const handleQuickLogin = () => {
+    console.log('=== QUICK LOGIN FOR TESTING ===');
+    const mockUser = {
+      id: 1,
+      name: 'Usuário Teste',
+      email: 'teste@teste.com'
+    };
+    localStorage.setItem('token', 'mock-token-for-testing');
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    onLogin(mockUser);
   };
 
   const handleGoogleLogin = async () => {
@@ -85,8 +110,11 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
       // Fazer login com Google
       const googleUser = await googleAuth.signIn();
       
+      // Salvar access token para uso posterior
+      localStorage.setItem('google_access_token', googleUser.accessToken);
+      
       // Enviar dados para o backend para autenticar
-      const response = await fetch('https://backend-jb661i4r6-sobreiras-projects.vercel.app/api/auth/google', {
+              const response = await fetch('https://backend-clean-steel.vercel.app/api/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,6 +182,7 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
               value={formData.email}
               onChange={handleChange}
               required
+              autoComplete="email"
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               placeholder="seu@email.com"
             />
@@ -171,6 +200,7 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
                 value={formData.password}
                 onChange={handleChange}
                 required
+                autoComplete="current-password"
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent pr-12"
                 placeholder="••••••••"
               />
@@ -231,6 +261,14 @@ const LoginScreen = ({ onLogin, onSwitchToRegister }) => {
                 Continuar com Google
               </>
             )}
+          </button>
+
+          {/* Botão de login rápido para teste */}
+          <button
+            onClick={handleQuickLogin}
+            className="mt-2 w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 flex items-center justify-center"
+          >
+            🚀 Login Rápido (Teste)
           </button>
         </div>
 

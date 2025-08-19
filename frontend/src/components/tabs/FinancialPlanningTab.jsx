@@ -49,13 +49,24 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
   useEffect(() => {
     const loadDataFromBackend = async () => {
       try {
+        console.log('🔄 Iniciando carregamento de dados do backend...');
+        const startTime = Date.now();
+        
         const response = await api.financialPlanning.getAll();
-        if (response.data) {
-          console.log('Dados carregados do backend:', response.data);
-          setPlanilhaFinanceiraState(response.data);
+        const endTime = Date.now();
+        
+        console.log(`⏱️ Tempo de resposta: ${endTime - startTime}ms`);
+        console.log('Resposta completa do backend:', response);
+        
+        // O endpoint retorna diretamente o array, não response.data
+        if (response && Array.isArray(response)) {
+          console.log(`✅ ${response.length} registros carregados do backend`);
+          setPlanilhaFinanceiraState(response);
+        } else {
+          console.log('❌ Resposta inválida do backend:', response);
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do backend:', error);
+        console.error('❌ Erro ao carregar dados do backend:', error);
         // Fallback para dados locais
       }
     };
@@ -228,10 +239,10 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
       </div>
 
       {/* Tabela */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gray-800/40 rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-gray-700/50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Mês
@@ -262,11 +273,11 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-gray-800/30 divide-y divide-gray-600/50">
               {filteredData.map((row, index) => (
                 <tr
                   key={index}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="hover:bg-gray-700/50"
                 >
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {editingRow === index ? (
@@ -289,7 +300,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
                         className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      `R$ ${row.rendaDev?.toLocaleString('pt-BR')}`
+                      `R$ ${row.rendaDev?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -301,7 +312,7 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
                         className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      `R$ ${row.rendaContab?.toLocaleString('pt-BR')}`
+                      `R$ ${row.rendaContab?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -313,20 +324,20 @@ const FinancialPlanningTab = ({ planilhaFinanceiraState, setPlanilhaFinanceiraSt
                         className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      `R$ ${row.freelas?.toLocaleString('pt-BR')}`
+                      `R$ ${row.freelas?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                    R$ {row.rendaTotal?.toLocaleString('pt-BR')}
+                    R$ {row.rendaTotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400">
-                    R$ {row.gastos?.toLocaleString('pt-BR')}
+                    R$ {row.gastos?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 dark:text-blue-400">
-                    R$ {row.aporte?.toLocaleString('pt-BR')}
+                    R$ {row.aporte?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-purple-600 dark:text-purple-400">
-                    R$ {row.saldoAcum?.toLocaleString('pt-BR')}
+                    R$ {row.saldoAcum?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex space-x-2">

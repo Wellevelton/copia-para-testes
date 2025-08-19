@@ -11,22 +11,22 @@ const ApiTest = () => {
 
     try {
       // Teste de health check
-      const healthResponse = await fetch('https://backend-98owvp080-sobreiras-projects.vercel.app/api/health');
+      const healthResponse = await fetch('https://backend-clean-steel.vercel.app/api/health');
       results.health = healthResponse.ok ? '✅ OK' : '❌ Erro';
 
       // Teste de login
-      const loginResponse = await apiService.login({
+      const loginResponse = await apiService.auth.login({
         email: 'teste@email.com',
         password: '123456'
       });
       results.login = loginResponse.success ? '✅ OK' : '❌ Erro';
 
       // Teste de goals
-      const goalsResponse = await apiService.getGoals();
+      const goalsResponse = await apiService.goals.getAll();
       results.goals = goalsResponse.data ? '✅ OK' : '❌ Erro';
 
       // Teste de finances
-      const financesResponse = await apiService.getFinances();
+      const financesResponse = await apiService.finances.getAll();
       results.finances = financesResponse.data ? '✅ OK' : '❌ Erro';
 
     } catch (error) {

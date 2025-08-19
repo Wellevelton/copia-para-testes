@@ -79,9 +79,9 @@ const FinancesTab = ({
       const savedTransaction = await apiService.finances.create(transaction);
       setFinances(prev => [...prev, savedTransaction.data]);
     } catch (error) {
-      console.error('Erro ao salvar transação no backend:', error);
-      // Fallback para localStorage
-      setFinances(prev => [...prev, transaction]);
+      console.error('❌ Erro ao salvar transação no backend:', error);
+      alert('❌ Erro ao salvar transação. Verifique sua conexão.');
+      return; // Não salvar localmente se backend falhar
     }
     setShowNewTransactionModal(false);
   };
@@ -91,9 +91,9 @@ const FinancesTab = ({
     const totalExpenses = getTotalExpenses();
     const balance = getBalance();
     
-    return (
-      <div className="space-y-6">
-        {/* Header com botões de ação */}
+          return (
+        <div className="space-y-6 auto-scroll" style={{maxHeight: 'calc(100vh - 200px)', paddingBottom: '2rem'}}>
+          {/* Header com botões de ação */}
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Transações Financeiras</h2>
           <div className="flex gap-2">
@@ -108,8 +108,8 @@ const FinancesTab = ({
         </div>
         
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-6 shadow-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-green-600/80 to-green-800/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-green-500/20">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100 text-sm font-medium">Receitas</p>
@@ -124,7 +124,7 @@ const FinancesTab = ({
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-xl p-6 shadow-lg">
+          <div className="bg-gradient-to-br from-red-600/80 to-red-800/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-red-500/20">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-red-100 text-sm font-medium">Despesas</p>
@@ -139,7 +139,7 @@ const FinancesTab = ({
             </div>
           </div>
           
-          <div className={`bg-gradient-to-br ${balance >= 0 ? 'from-blue-600 to-blue-800' : 'from-orange-600 to-orange-800'} rounded-xl p-6 shadow-lg`}>
+          <div className={`bg-gradient-to-br ${balance >= 0 ? 'from-blue-600/80 to-blue-800/80' : 'from-orange-600/80 to-orange-800/80'} backdrop-blur-sm rounded-xl p-6 shadow-lg border ${balance >= 0 ? 'border-blue-500/20' : 'border-orange-500/20'}`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className={`${balance >= 0 ? 'text-blue-100' : 'text-orange-100'} text-sm font-medium`}>Saldo</p>
@@ -158,11 +158,12 @@ const FinancesTab = ({
         </div>
         
         {/* Transactions List */}
-        <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-4 md:p-6 shadow-lg border border-gray-700/30">
+          <div className="overflow-y-auto max-h-[350px] pr-8">
           <h3 className="text-white font-semibold mb-4 text-lg">Transações Recentes</h3>
           <div className="space-y-4">
             {finances.slice(-10).reverse().map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+              <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-all duration-200 backdrop-blur-sm">
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     transaction.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
@@ -182,6 +183,7 @@ const FinancesTab = ({
                 </div>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </div>
@@ -227,7 +229,7 @@ const FinancesTab = ({
     };
     
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 auto-scroll" style={{maxHeight: 'calc(100vh - 200px)', paddingBottom: '2rem'}}>
                  <div className="flex items-center justify-between">
            <h2 className="text-2xl font-bold text-white">Orçamento</h2>
            <div className="flex items-center gap-4">
@@ -262,7 +264,7 @@ const FinancesTab = ({
         
                           {/* Resumo Geral */}
          <div className="mb-6">
-           <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
+           <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 shadow-lg border border-gray-700/30">
              <h3 className="text-white font-semibold text-lg mb-4">Resumo Geral</h3>
              <div className="space-y-3">
                <div className="flex justify-between text-sm">
@@ -316,7 +318,7 @@ const FinancesTab = ({
            </div>
          </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
            {Object.entries(categories).map(([category, data]) => {
              const actual = getActualExpenses(category);
              const planned = getPlannedDataByCategory(category);
@@ -324,9 +326,9 @@ const FinancesTab = ({
              const isOverBudget = actual > planned;
             
             return (
-              <div key={category} className="bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white font-semibold text-lg">{category}</h3>
+              <div key={category} className="bg-gray-800/40 backdrop-blur-md rounded-xl p-4 shadow-lg border border-gray-700/30 hover:shadow-xl transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-white font-semibold text-base">{category}</h3>
                   {editingBudget && (
                     <button className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
                       <Edit size={16} />

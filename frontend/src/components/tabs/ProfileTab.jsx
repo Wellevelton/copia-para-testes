@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { User, Camera, Save, Edit } from 'lucide-react';
 import apiService from '../../services/api';
 
-const ProfileTab = ({ careerPlanning, setCareerPlanning, onBack }) => {
+const ProfileTab = ({ careerPlanning, setCareerPlanning, onBack, userName, userEmail }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: 'Wellevelton Silva',
-    email: 'wellevelton@email.com',
+    name: userName || 'Usuário',
+    email: userEmail || 'usuario@email.com',
     currentRole: careerPlanning?.currentRole || 'Desenvolvedor Frontend Jr',
     location: 'São Paulo, Brasil',
     bio: 'Desenvolvedor apaixonado por criar soluções inovadoras e experiências únicas.',
@@ -46,7 +46,7 @@ const ProfileTab = ({ careerPlanning, setCareerPlanning, onBack }) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 auto-scroll" style={{maxHeight: 'calc(100vh - 200px)', paddingBottom: '2rem'}}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4 rounded-xl">
@@ -57,17 +57,10 @@ const ProfileTab = ({ careerPlanning, setCareerPlanning, onBack }) => {
             <p className="text-gray-400">Gerencie suas informações pessoais</p>
           </div>
         </div>
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Voltar
-          </button>
-        )}
+
       </div>
 
-      <div className="bg-gray-800 rounded-xl p-8 shadow-lg">
+      <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-8 shadow-lg border border-gray-700/30">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-white font-semibold text-xl flex items-center gap-3">
             <User className="text-purple-400" size={24} />

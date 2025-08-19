@@ -4,13 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Planner Pro - Organizador Pessoal</title>
+        <title>Planner Pro - Organizador Pessoal</title>
     
-    <!-- Google API Script -->
-    <script src="https://apis.google.com/js/api.js"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Spline 3D -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@0.9.490/build/spline-viewer.js"></script>
   </head>
   <body>
     <div id="root"></div>
+    <div id="modal-root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Calendar, MapPin, DollarSign, Plane, Hotel, Utensils, Car, Dumbbell, Pill, Camera, Shield, Phone, FileText } from 'lucide-react';
 
-const EditTravelModal = ({ isOpen, onClose, onSave, travelData }) => {
+const EditTravelModal = ({ isOpen, onClose, onSave, travelData, isRealizadoMode = false }) => {
   const [formData, setFormData] = useState({
     cidade: '',
     pais: '',
@@ -20,33 +20,61 @@ const EditTravelModal = ({ isOpen, onClose, onSave, travelData }) => {
     voos_longos: 0,
     notas: '',
     bloco: '',
-    rating: 8.0
+    rating: 8.0,
+    confirmada: false
   });
 
   useEffect(() => {
     if (travelData) {
-      setFormData({
-        cidade: travelData.cidade || '',
-        pais: travelData.pais || '',
-        zona: travelData.zona || 'Schengen',
-        inicio: travelData.inicio ? travelData.inicio.split(' ')[0] : '',
-        fim: travelData.fim ? travelData.fim.split(' ')[0] : '',
-        hospedagem_base: travelData.hospedagem_base || 0,
-        alimentacao_base: travelData.alimentacao_base || 0,
-        transporte_base: travelData.transporte_base || 0,
-        academia_base: travelData.academia_base || 0,
-        suplementos_base: travelData.suplementos_base || 0,
-        atividades_base: travelData.atividades_base || 0,
-        seguro_base: travelData.seguro_base || 62,
-        telefone_base: travelData.telefone_base || 20,
-        vistos_base: travelData.vistos_base || 25,
-        voos_longos: travelData.voos_longos || 0,
-        notas: travelData.notas || '',
-        bloco: travelData.bloco || '',
-        rating: travelData.rating || 8.0
-      });
+      if (isRealizadoMode) {
+        // Modo Realizado: carregar valores realizados ou zerados
+        setFormData({
+          cidade: travelData.cidade || '',
+          pais: travelData.pais || '',
+          zona: travelData.zona || 'Schengen',
+          inicio: travelData.inicio ? travelData.inicio.split(' ')[0] : '',
+          fim: travelData.fim ? travelData.fim.split(' ')[0] : '',
+          hospedagem_base: travelData.hospedagem_realizado || 0,
+          alimentacao_base: travelData.alimentacao_realizado || 0,
+          transporte_base: travelData.transporte_realizado || 0,
+          academia_base: travelData.academia_realizado || 0,
+          suplementos_base: travelData.suplementos_realizado || 0,
+          atividades_base: travelData.atividades_realizado || 0,
+          seguro_base: travelData.seguro_base_realizado || 0,
+          telefone_base: travelData.telefone_base_realizado || 0,
+          vistos_base: travelData.vistos_base_realizado || 0,
+          voos_longos: travelData.voos_longos_realizado || 0,
+          notas: travelData.notas || '',
+          bloco: travelData.bloco || '',
+          rating: travelData.rating || 8.0,
+          confirmada: travelData.confirmada || false
+        });
+      } else {
+        // Modo Planejado: carregar valores da planilha
+        setFormData({
+          cidade: travelData.cidade || '',
+          pais: travelData.pais || '',
+          zona: travelData.zona || 'Schengen',
+          inicio: travelData.inicio ? travelData.inicio.split(' ')[0] : '',
+          fim: travelData.fim ? travelData.fim.split(' ')[0] : '',
+          hospedagem_base: travelData.hospedagem_base || travelData.hospedagem || 0,
+          alimentacao_base: travelData.alimentacao_base || travelData.alimentacao || 0,
+          transporte_base: travelData.transporte_base || travelData.transporte || 0,
+          academia_base: travelData.academia_base || travelData.academia || 0,
+          suplementos_base: travelData.suplementos_base || travelData.suplementos || 0,
+          atividades_base: travelData.atividades_base || travelData.atividades || 0,
+          seguro_base: travelData.seguro_base || 62,
+          telefone_base: travelData.telefone_base || 20,
+          vistos_base: travelData.vistos_base || 25,
+          voos_longos: travelData.voos_longos || 0,
+          notas: travelData.notas || '',
+          bloco: travelData.bloco || '',
+          rating: travelData.rating || 8.0,
+          confirmada: travelData.confirmada || false
+        });
+      }
     }
-  }, [travelData]);
+  }, [travelData, isRealizadoMode]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -71,30 +99,53 @@ const EditTravelModal = ({ isOpen, onClose, onSave, travelData }) => {
     const total = calculateTotal();
     const fator = formData.zona === 'Schengen' ? 1.2 : 1.25;
     
-    const updatedTravel = {
+    let updatedTravel = {
       ...travelData,
-      ...formData,
-      subtotal_base: subtotal,
-      subtotal_alto: Math.round(subtotal * fator),
-      fator_extrapolado: fator,
-      total_base: total,
-      total_alto: Math.round(total * fator),
-      buffer_base: Math.round(total * 0.08),
-      buffer_alto: Math.round(total * fator * 0.08),
-      total_base_c_buffer: Math.round(total * 1.08),
-      total_alto_c_buffer: Math.round(total * fator * 1.08),
-      dias_semana: 7,
-      dias_schengen: formData.zona === 'Schengen' ? 7 : 0,
-      distotal: subtotal,
-      longdist: Math.round(subtotal * fator),
-      hospedagem: formData.hospedagem_base,
-      tentacao: formData.alimentacao_base,
-      importe: formData.transporte_base,
-      bagemia: formData.academia_base,
-      bimentos: formData.suplementos_base,
-      cidades: formData.atividades_base,
-      notes: formData.seguro_base
+      ...formData
     };
+
+    if (isRealizadoMode) {
+      // Modo Realizado: salvar com sufixo "_realizado"
+      updatedTravel = {
+        ...updatedTravel,
+        hospedagem_realizado: formData.hospedagem_base,
+        alimentacao_realizado: formData.alimentacao_base,
+        transporte_realizado: formData.transporte_base,
+        academia_realizado: formData.academia_base,
+        suplementos_realizado: formData.suplementos_base,
+        atividades_realizado: formData.atividades_base,
+        seguro_base_realizado: formData.seguro_base,
+        telefone_base_realizado: formData.telefone_base,
+        vistos_base_realizado: formData.vistos_base,
+        voos_longos_realizado: formData.voos_longos,
+        total_realizado: total
+      };
+    } else {
+      // Modo Planejado: manter lógica original
+      updatedTravel = {
+        ...updatedTravel,
+        subtotal_base: subtotal,
+        subtotal_alto: Math.round(subtotal * fator),
+        fator_extrapolado: fator,
+        total_base: total,
+        total_alto: Math.round(total * fator),
+        buffer_base: Math.round(total * 0.08),
+        buffer_alto: Math.round(total * fator * 0.08),
+        total_base_c_buffer: Math.round(total * 1.08),
+        total_alto_c_buffer: Math.round(total * fator * 1.08),
+        dias_semana: 7,
+        dias_schengen: formData.zona === 'Schengen' ? 7 : 0,
+        distotal: subtotal,
+        longdist: Math.round(subtotal * fator),
+        hospedagem: formData.hospedagem_base,
+        tentacao: formData.alimentacao_base,
+        importe: formData.transporte_base,
+        bagemia: formData.academia_base,
+        bimentos: formData.suplementos_base,
+        cidades: formData.atividades_base,
+        notes: formData.seguro_base
+      };
+    }
 
     onSave(updatedTravel);
     onClose();
@@ -208,6 +259,22 @@ const EditTravelModal = ({ isOpen, onClose, onSave, travelData }) => {
                 rows={3}
                 placeholder="Observações sobre a viagem..."
               />
+            </div>
+
+            {/* Confirmar Viagem */}
+            <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.confirmada}
+                  onChange={(e) => handleInputChange('confirmada', e.target.checked)}
+                  className="w-5 h-5 text-green-600 bg-gray-700 border-gray-600 rounded focus:ring-green-500 focus:ring-2"
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400 font-medium">Confirmar Viagem</span>
+                  <span className="text-green-300 text-sm">(Marque quando a viagem estiver confirmada)</span>
+                </div>
+              </label>
             </div>
           </div>
 
