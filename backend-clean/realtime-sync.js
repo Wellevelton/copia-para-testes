@@ -70,6 +70,47 @@ class RealtimeSync {
       case 'sync_calendar':
         await this.syncCalendar(ws);
         break;
+      // Novos tipos para sincronização geral
+      case 'goal_updated':
+        this.broadcastToOthers(ws, {
+          type: 'goal_updated',
+          goalId: data.goalId,
+          data: data.data
+        });
+        break;
+      case 'subgoal_updated':
+        this.broadcastToOthers(ws, {
+          type: 'subgoal_updated',
+          goalId: data.goalId,
+          subgoalId: data.subgoalId,
+          data: data.data
+        });
+        break;
+      case 'project_updated':
+        this.broadcastToOthers(ws, {
+          type: 'project_updated',
+          projectId: data.projectId,
+          data: data.data
+        });
+        break;
+      case 'finance_updated':
+        this.broadcastToOthers(ws, {
+          type: 'finance_updated',
+          financeId: data.financeId,
+          data: data.data
+        });
+        break;
+      case 'travel_updated':
+        this.broadcastToOthers(ws, {
+          type: 'travel_updated',
+          travelId: data.travelId,
+          data: data.data
+        });
+        break;
+      case 'user_connected':
+        ws.userId = data.userId;
+        console.log(`👤 Usuário ${data.userId} conectado via WebSocket`);
+        break;
     }
   }
 
@@ -299,6 +340,26 @@ class RealtimeSync {
     const data = JSON.stringify(message);
     this.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
+  }
+
+  // Broadcast message to all clients except the sender
+  broadcastToOthers(sender, message) {
+    const data = JSON.stringify(message);
+    this.clients.forEach(client => {
+      if (client !== sender && client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
+  }
+
+  // Broadcast to specific user
+  broadcastToUser(userId, message) {
+    const data = JSON.stringify(message);
+    this.clients.forEach(client => {
+      if (client.userId === userId && client.readyState === WebSocket.OPEN) {
         client.send(data);
       }
     });

@@ -4,16 +4,35 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const http = require('http');
-const RealtimeSync = require('./realtime-sync');
 const { getPrismaClient } = require('./prisma-client');
 
 const app = express();
 const server = http.createServer(app);
 let prisma;
 
-// Initialize real-time sync
-const realtimeSync = new RealtimeSync();
-realtimeSync.setupWebSocketServer(server);
+// Cache simples em memória para otimização
+const cache = {
+  goals: { data: null, timestamp: 0, ttl: 30000 }, // 30 segundos
+  projects: { data: null, timestamp: 0, ttl: 30000 },
+  finances: { data: null, timestamp: 0, ttl: 30000 },
+  travels: { data: null, timestamp: 0, ttl: 30000 },
+  calendar: { data: null, timestamp: 0, ttl: 30000 },
+  career: { data: null, timestamp: 0, ttl: 30000 }
+};
+
+// Função para verificar se cache é válido
+const isCacheValid = (key) => {
+  const cacheItem = cache[key];
+  return cacheItem && (Date.now() - cacheItem.timestamp) < cacheItem.ttl;
+};
+
+// Função para invalidar cache
+const invalidateCache = (key) => {
+  if (cache[key]) {
+    cache[key].data = null;
+    cache[key].timestamp = 0;
+  }
+};
 
 // Função para obter Prisma de forma lazy (só quando necessário)
 async function getPrisma() {
@@ -704,14 +723,25 @@ app.post('/api/import/finances', authenticateToken, async (req, res) => {
 
 // ==================== ROTAS PROTEGIDAS ====================
 
-// Goals
+// Goals - Otimizado com cache
 app.get('/api/goals', authenticateToken, async (req, res) => {
   try {
+    // Verificar cache primeiro
+    if (isCacheValid('goals')) {
+      console.log('📦 Retornando goals do cache');
+      return res.json(cache.goals.data);
+    }
+
     const db = await getPrisma();
     if (db) {
       const goals = await db.goal.findMany({
         where: { userId: req.user.userId }
       });
+      
+      // Atualizar cache
+      cache.goals.data = goals;
+      cache.goals.timestamp = Date.now();
+      
       res.json(goals);
     } else {
       // Mock data
@@ -953,6 +983,9 @@ app.put('/api/goals/:id', authenticateToken, async (req, res) => {
         }
       });
       
+      // Invalidar cache após atualização
+      invalidateCache('goals');
+      
       console.log('✅ Meta atualizada com sucesso');
       res.json({ data: updatedGoal });
     } else {
@@ -1010,6 +1043,9 @@ app.put('/api/projects/:id', authenticateToken, async (req, res) => {
           priority: req.body.priority || existingProject.priority
         }
       });
+      
+      // Invalidar cache após atualização
+      invalidateCache('projects');
       
       console.log('✅ Projeto atualizado com sucesso');
       res.json({ data: updatedProject });
@@ -1271,14 +1307,25 @@ app.delete('/api/finances/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Projects
+// Projects - Otimizado com cache
 app.get('/api/projects', authenticateToken, async (req, res) => {
   try {
+    // Verificar cache primeiro
+    if (isCacheValid('projects')) {
+      console.log('📦 Retornando projects do cache');
+      return res.json(cache.projects.data);
+    }
+
     const db = await getPrisma();
     if (db) {
       const projects = await db.project.findMany({
         where: { userId: req.user.userId }
       });
+      
+      // Atualizar cache
+      cache.projects.data = projects;
+      cache.projects.timestamp = Date.now();
+      
       res.json(projects);
     } else {
       // Mock data
@@ -1543,11 +1590,18 @@ app.post('/api/calendar', authenticateToken, async (req, res) => {
   }
 });
 
-// Financial Planning
+// Financial Planning - Otimizado com cache
 app.get('/api/financial-planning', authenticateToken, async (req, res) => {
   try {
     console.log('=== GET /api/financial-planning ===');
     console.log('User ID:', req.user.userId);
+    
+    // Verificar cache primeiro
+    if (isCacheValid('career')) {
+      console.log('📦 Retornando financial-planning do cache');
+      return res.json(cache.career.data);
+    }
+    
     const startTime = Date.now();
     
     const db = await getPrisma();
@@ -1561,7 +1615,10 @@ app.get('/api/financial-planning', authenticateToken, async (req, res) => {
       const endTime = Date.now();
       console.log(`⏱️ Tempo de consulta: ${endTime - startTime}ms`);
       console.log('📊 Dados encontrados:', planning.length, 'registros');
-      console.log('📋 Primeiros 3 registros:', planning.slice(0, 3));
+      
+      // Atualizar cache
+      cache.career.data = planning;
+      cache.career.timestamp = Date.now();
       
       res.json(planning);
     } else {
@@ -2087,6 +2144,8 @@ app.trace('/api/debug', (req, res) => {
   });
 });
 
+
+
 // ==================== ERROR HANDLERS ====================
 // Handler global para erros de CORS
 app.use((err, req, res, next) => {
@@ -2115,7 +2174,6 @@ if (process.env.NODE_ENV !== 'production') {
   server.listen(PORT, () => {
     console.log(`🚀 Backend limpo rodando na porta ${PORT}`);
     console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔗 WebSocket ativo para sync em tempo real`);
     console.log(`🔒 CORS configurado para aceitar frontend Vercel`);
   });
 }
